@@ -9,6 +9,15 @@ var EZBart = {
     $('.mode').change(EZBart.toggleButtons);
     EZBart.populate_time_menu();
     $('.control').change(EZBart.request);
+    $('#swap').click(EZBart.swapStations);
+  }
+
+  ,swapStations: function() {
+    var tmp = $('#depart').prop('selectedIndex');
+    $('#depart').prop('selectedIndex', $('#arrive').prop('selectedIndex'));
+    $('#arrive').prop('selectedIndex', tmp);
+    // recalculate route
+    $('#depart').trigger('change');
   }
 
   ,toggleButtons: function() {
@@ -35,13 +44,13 @@ var EZBart = {
       "error": EZBart.error,
       "data": params,
       "dataType": "json",
-      "timeout": 3000
+      "timeout": 4000
     });
   }
 
   ,callback: function(data, status, xhrObject) {
     var trips = data["root"]["schedule"]["request"]["trip"];
-    $('#results').html("");
+    $('#results').html("").removeClass('alert').removeClass('alert-danger');
     for (var i=0; i < trips.length; i += 1) {
       var trip = trips[i];
       var result = EZBart.trip_to_html(trip);
@@ -55,7 +64,9 @@ var EZBart = {
     var numLegs = leg.length;
     var origTime = leg[0]["@origTimeMin"];
     var destTime = leg[numLegs-1]["@destTimeMin"];
-    var result = "<div class='text-primary font-weight-bold'>" + origTime + "&rarr;" + destTime + "</div>" +
+    var result = "<div class='text-primary font-weight-bold'>" +
+        origTime + "&nbsp;&rarr;&nbsp;" + destTime +
+        "</div>" +
         "<div class='text-secondary'>" + leg[0]["@trainHeadStation"] + " train";
     if (numLegs > 1) {
       result += ", change at " + EZBart.abbrevs[leg[1]["@origin"].toLowerCase()] +
@@ -70,12 +81,13 @@ var EZBart = {
   }
 
   ,error: function(xhrObject, errorString, exceptionObject) {
-    $('#results').text(errorString);
+    $('#results').addClass('alert').addClass('alert-danger').text(errorString);
   }
 
   ,populate_time_menu: function() {
     var now = new Date();
-    var index = 4 * Math.floor(now.getHours() - 4);
+    var index = 4 * Math.floor(now.getHours() - 4) +
+        (Math.floor(now.getMinutes() / 15));
     if (index < 0) { index = 0 };
     for (var i=index; i < EZBart.times.length; i += 1) {
       var time = EZBart.times[i];
