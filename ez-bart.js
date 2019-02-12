@@ -28,9 +28,48 @@ var EZBart = {
       "json": "y",
       "key": EZBart.api_key
     };
-    var base_uri = "http://api.bart.gov/api/";
-    var uri = base_uri + '?' + $.param(params);
-    alert(uri);
+    
+    $.ajax({
+      "url": "http://api.bart.gov/api/sched.aspx",
+      "success": EZBart.callback,
+      "error": EZBart.error,
+      "data": params,
+      "dataType": "json"
+    });
+  }
+
+  ,callback: function(data, status, xhrObject) {
+    var trips = data["root"]["schedule"]["request"]["trip"];
+    $('#results').html("");
+    for (var i=0; i < trips.length; i += 1) {
+      var trip = trips[i];
+      var result = EZBart.trip_to_html(trip);
+      var div = $("<div class='border-top'>" + result + "</div>");
+      $('#results').append(div);
+    }
+  }
+
+  ,trip_to_html: function(trip) {
+    var leg = trip.leg;
+    var numLegs = leg.length - 1;
+    var origTime = leg[0]["@origTimeMin"];
+    var destTime = leg[numLegs]["@destTimeMin"];
+    var result = "<p class='itin'>" + origTime + "&rarr;" + destTime + "</p>" +
+        "<p class='route'>" + leg[0]["@trainHeadStation"] + " train";
+    if (numLegs > 1) {
+      result += ", change at " + EZBart.abbrevs[leg[1]["@origin"].toLowerCase()] +
+        " for " + leg[1]["@trainHeadStation"] + " train";
+      if (numLegs > 2) {
+        result += ", then at " + EZBart.abbrevs[leg[2]["@origin"].toLowerCase()] +
+          " for " + leg[2]["@trainHeadStation"] + " train";
+      }
+    }
+    result += "</p>";
+    return(result);
+  }
+
+  ,error: function(xhrObject, errorString, exceptionObject) {
+    $('#results').text(errorString);
   }
 
   ,populate_time_menu: function() {
@@ -66,7 +105,7 @@ var EZBart = {
     '11:00 pm', '11:15 pm', '11:30 pm', '11:45 pm'
   ]
 
-    
+  
   ,populate_stations: function() {
     $.each(EZBart.abbrevs, function(val, display_string) {
       $('#arrive,#depart').append(
@@ -124,6 +163,35 @@ var EZBart = {
     "wdub": "West Dublin",
     "woak": "West Oakland"
   }
+
+  ,routes: [
+    // https://api.bart.gov/docs/route/routes.aspx
+    // can get this automatically by requesting ?cmd=routes&json=y&key=KEY
+    //  and dereferencing result.root.routes.route[], each of which has keys
+    //  "name", "abbr", "routeID" (eg "ROUTE 1"), "number", "hexcolor"
+    "",                         // dummy route 0
+    "SFO/Millbrae", // 1
+    "Pittsburg/Bay Point", // 2
+    "Richmond", // 3
+    "Warm Springs/South Fremont", // 4
+    "Daly City", // 5
+    "Warm Springs/South Fremont", // 6
+    "Millbrae", // 7
+    "Richmond", // 8
+    "", // dummy 9
+    "", // dummy 10
+    "Daly City", // 11
+    "Dublin/Pleasanton", // 12
+    "", // dummy 13
+    "", // dummy 14
+    "", // dummy 15
+    "", // dummy 16
+    "", // dummy 17
+    "", // dummy 18
+    "Oakland Airport Connector", // 19
+    "Coliseum" // 20
+  ]
+  
 }
 
 $(EZBart.setup);
