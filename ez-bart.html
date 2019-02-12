@@ -1,0 +1,52 @@
+<!DOCTYPE html lang="en-us">
+<html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="ez-bart.js"></script>
+    <title>EZ BART</title>
+  </head>
+  <body>
+    <p class="lead text-center bg-primary text-white py-2">Today's BART Schedule</p>
+    <div class="container">
+      <div class="form">
+
+        <div class="form-group">
+          <label class="col-form-label">From</label>
+          <select id="depart" class="form-control control">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="col-form-label">To</label>
+          <select id="arrive" class="form-control control">
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="col-6">
+            <div class="btn-group btn-group-toggle">
+              <label class="btn btn-primary mode">
+                <input type="radio" name="cmd" id="arrive" autocomplete="off" class="control btn-block" checked> Arr
+              </label>
+              <label class="btn btn-outline-primary mode">
+                <input type="radio" name="cmd" id="depart" autocomplete="off" class="control btn-block"> Dep
+              </label>
+            </div>
+          </div>
+          <div class="col-6">
+            <select id="time" class="form-control control">
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container" id="results">
+
+    </div>
+  </body>
+</html>
