@@ -24,7 +24,7 @@ var EZBart = {
       "dest":  $('#arrive').val(),
       "time": $('#time').val(),
       "b": 2,
-      "a": 2,
+      "a": 1,
       "json": "y",
       "key": EZBart.api_key
     };
@@ -34,7 +34,8 @@ var EZBart = {
       "success": EZBart.callback,
       "error": EZBart.error,
       "data": params,
-      "dataType": "json"
+      "dataType": "json",
+      "timeout": 3000
     });
   }
 
@@ -51,11 +52,11 @@ var EZBart = {
 
   ,trip_to_html: function(trip) {
     var leg = trip.leg;
-    var numLegs = leg.length - 1;
+    var numLegs = leg.length;
     var origTime = leg[0]["@origTimeMin"];
-    var destTime = leg[numLegs]["@destTimeMin"];
-    var result = "<p class='itin'>" + origTime + "&rarr;" + destTime + "</p>" +
-        "<p class='route'>" + leg[0]["@trainHeadStation"] + " train";
+    var destTime = leg[numLegs-1]["@destTimeMin"];
+    var result = "<div class='text-primary font-weight-bold'>" + origTime + "&rarr;" + destTime + "</div>" +
+        "<div class='text-secondary'>" + leg[0]["@trainHeadStation"] + " train";
     if (numLegs > 1) {
       result += ", change at " + EZBart.abbrevs[leg[1]["@origin"].toLowerCase()] +
         " for " + leg[1]["@trainHeadStation"] + " train";
@@ -64,7 +65,7 @@ var EZBart = {
           " for " + leg[2]["@trainHeadStation"] + " train";
       }
     }
-    result += "</p>";
+    result += "</div>";
     return(result);
   }
 
@@ -75,6 +76,7 @@ var EZBart = {
   ,populate_time_menu: function() {
     var now = new Date();
     var index = 4 * Math.floor(now.getHours() - 4);
+    if (index < 0) { index = 0 };
     for (var i=index; i < EZBart.times.length; i += 1) {
       var time = EZBart.times[i];
       $('#time').append(
