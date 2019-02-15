@@ -43,13 +43,17 @@ var EZBart = {
   }
 
   ,request: function() {
+    var cmd = $('input:radio[name=cmd]:checked').attr('id');
+    var after;
+    var before;
+    if (cmd == "arrive") { before=3; after=1; } else { before=1; after=3; }
     var params = {
-      "cmd":  $('input:radio[name=cmd]:checked').attr('id'),
+      "cmd":  cmd,
       "orig": $('#depart').val(),
       "dest":  $('#arrive').val(),
       "time": $('#time').val(),
-      "b": 2,
-      "a": 1,
+      "b": before,
+      "a": after,
       "json": "y",
       "key": EZBart.api_key
     };
