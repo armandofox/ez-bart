@@ -17,6 +17,7 @@ var EZBart = {
   ,populateFromFavorites: function() {
     var prefs;
     if (prefs = localStorage.getItem('ezbart')) {
+      prefs = JSON.parse(prefs);
       $('#orig').prop('selectedIndex', prefs.orig);
       $('#dest').prop('selectedIndex', prefs.dest);
       $('.mode').removeClass('btn-primary').addClass('btn-outline-primary');
@@ -35,11 +36,11 @@ var EZBart = {
   }
 
   ,saveFavorite: function() {
-    localStorage.setItem('ezbart', {
+    localStorage.setItem('ezbart', JSON.stringify({
       'orig': $('#orig').prop('selectedIndex'),
       'dest': $('#dest').prop('selectedIndex'),
       'cmd' : $('input:radio[name=cmd]:checked').attr('id')
-    });
+    }));
     $('#save').fadeTo(300,0.1).fadeTo(300,1.0);
     return(false);
   }
