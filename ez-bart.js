@@ -42,7 +42,7 @@ var EZBart = {
     localStorage.setItem('orig', $('#orig').prop('selectedIndex'));
     localStorage.setItem('dest', $('#dest').prop('selectedIndex'));
     localStorage.setItem('cmd', $('input:radio[name=cmd]:checked').attr('id'));
-    $('#save').hide().delay(2000).fadeIn(500);
+    $('#save').fadeOut(1000).delay(2000).fadeIn(1000);
     return(false);
   }
                          
