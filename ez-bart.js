@@ -6,20 +6,28 @@ var EZBart = {
 
   ,setup: function() {
     EZBart.populate_stations();
-    var stn;
     $('.mode').change(EZBart.toggleButtons);
     EZBart.populate_time_menu();
     $('.control').change(EZBart.request);
     $('#swap').click(EZBart.swapStations);
     $('#save').click(EZBart.saveFavorite);
+    EZBart.populateFromFavorites();
+  }
+
+  ,populateFromFavorites: function() {
+    var stn;
     if (stn = localStorage.getItem('depart')) {
       $('#depart').prop('selectedIndex', stn);
     }
     if (stn = localStorage.getItem('arrive')) {
       $('#arrive').prop('selectedIndex', stn);
-      $('#arrive').trigger('change');
     }
-
+    if (stn = localStorage.getItem('cmd')) {
+      $('.mode').removeClass('btn-primary').addClass('btn-outline-primary');
+      $('#' + stn).prop('checked', true).
+        addClass('btn-primary').
+        trigger('change');
+    }
   }
 
   ,swapStations: function() {
@@ -33,6 +41,8 @@ var EZBart = {
   ,saveFavorite: function() {
     localStorage.setItem('depart', $('#depart').prop('selectedIndex'));
     localStorage.setItem('arrive', $('#arrive').prop('selectedIndex'));
+    localStorage.setItem('cmd', $('input:radio[name=cmd]:checked').attr('id'));
+    $('#save').html('&#x2714;').delay(2000).html('Make Favorite');
     return(false);
   }
                          
@@ -46,7 +56,7 @@ var EZBart = {
     var cmd = $('input:radio[name=cmd]:checked').attr('id');
     var after;
     var before;
-    if (cmd == "arrive") { before=3; after=1; } else { before=1; after=3; }
+    if (cmd == "arrive") { before=3; after=1; } else { before=0; after=4; }
     var params = {
       "cmd":  cmd,
       "orig": $('#depart').val(),
