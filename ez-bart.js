@@ -17,13 +17,18 @@ var EZBart = {
   ,populateFromFavorites: function() {
     var prefs;
     if (prefs = localStorage.getItem('ezbart')) {
-      prefs = JSON.parse(prefs);
-      $('#orig').prop('selectedIndex', prefs.orig);
-      $('#dest').prop('selectedIndex', prefs.dest);
-      $('.mode').removeClass('btn-primary').addClass('btn-outline-primary');
-      $('#' + prefs.cmd).prop('checked', true).
-        addClass('btn-primary').
-        trigger('change');
+      try {
+        prefs = JSON.parse(prefs);
+        $('#orig').prop('selectedIndex', prefs.orig);
+        $('#dest').prop('selectedIndex', prefs.dest);
+        $('.mode').removeClass('btn-primary').addClass('btn-outline-primary');
+        $('#' + prefs.cmd).prop('checked', true).
+          addClass('btn-primary').
+          trigger('change');
+      }
+    } catch(err) {
+      // usually invalid object: reset it
+      localStorage.setItem('ezbart'), JSON.stringify({});
     }
   }
 
@@ -44,7 +49,7 @@ var EZBart = {
     $('#save').fadeTo(300,0.1).fadeTo(300,1.0);
     return(false);
   }
-                         
+  
   ,toggleButtons: function() {
     // change from not-checked to checked; called once for each button
     $('.mode').removeClass('btn-primary').addClass('btn-outline-primary');
