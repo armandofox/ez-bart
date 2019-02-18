@@ -15,16 +15,12 @@ var EZBart = {
   }
 
   ,populateFromFavorites: function() {
-    var stn;
-    if (stn = localStorage.getItem('orig')) {
-      $('#orig').prop('selectedIndex', stn);
-    }
-    if (stn = localStorage.getItem('dest')) {
-      $('#dest').prop('selectedIndex', stn);
-    }
-    if (stn = localStorage.getItem('cmd')) {
+    var prefs;
+    if (prefs = localStorage.getItem('ezbart')) {
+      $('#orig').prop('selectedIndex', prefs.orig);
+      $('#dest').prop('selectedIndex', prefs.dest);
       $('.mode').removeClass('btn-primary').addClass('btn-outline-primary');
-      $('#' + stn).prop('checked', true).
+      $('#' + prefs.cmd).prop('checked', true).
         addClass('btn-primary').
         trigger('change');
     }
@@ -39,9 +35,11 @@ var EZBart = {
   }
 
   ,saveFavorite: function() {
-    localStorage.setItem('orig', $('#orig').prop('selectedIndex'));
-    localStorage.setItem('dest', $('#dest').prop('selectedIndex'));
-    localStorage.setItem('cmd', $('input:radio[name=cmd]:checked').attr('id'));
+    localStorage.setItem('ezbart', {
+      'orig': $('#orig').prop('selectedIndex'),
+      'dest': $('#dest').prop('selectedIndex'),
+      'cmd' : $('input:radio[name=cmd]:checked').attr('id')
+    });
     $('#save').fadeTo(300,0.1).fadeTo(300,1.0);
     return(false);
   }
@@ -155,6 +153,8 @@ var EZBart = {
       $('#dest,#orig').append(
         $('<option></option>').attr("value", val).text(display_string));
     });
+    // make sure they don't have the same station selected, or error happens
+    $('#dest').prop('selectedIndex', 1 + $('#orig').prop('selectedIndex'));
   }
   ,abbrevs: {
     // from https://api.bart.gov/docs/overview/abbrev.aspx
