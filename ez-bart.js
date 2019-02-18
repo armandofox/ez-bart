@@ -60,7 +60,7 @@ var EZBart = {
     var params = {
       "cmd":  cmd,
       "orig": $('#orig').val(),
-      "dest":  $('#dest').val(),
+      "dest": $('#dest').val(),
       "time": $('#time').val(),
       "b": before,
       "a": after,
