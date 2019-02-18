@@ -25,10 +25,10 @@ var EZBart = {
         $('#' + prefs.cmd).prop('checked', true).
           addClass('btn-primary').
           trigger('change');
+      } catch(err) {
+        // usually invalid object: reset it
+        localStorage.setItem('ezbart'), JSON.stringify({});
       }
-    } catch(err) {
-      // usually invalid object: reset it
-      localStorage.setItem('ezbart'), JSON.stringify({});
     }
   }
 
