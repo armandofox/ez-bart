@@ -27,7 +27,7 @@ var EZBart = {
           trigger('change');
       } catch(err) {
         // usually invalid object: reset it
-        localStorage.setItem('ezbart'), JSON.stringify({});
+        localStorage.setItem('ezbart', JSON.stringify({}));
       }
     }
   }
