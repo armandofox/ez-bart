@@ -16,25 +16,25 @@
     <div class="container">
       <div class="form">
         <div class="form-row pb-1">
-          <label for="depart" class="col-4 col-form-label">From&nbsp;&rarr;&nbsp;To</label>
+          <label for="orig" class="col-4 col-form-label">From&nbsp;&rarr;&nbsp;To</label>
           <a id="save" href="#" class="btn btn-sm px-2 btn-success col-5">Make Favorite</a>
           <a id="swap" href="#" class="btn btn-sm px-2 btn-primary col-3">Swap</a>
         </div>
         <div class="form-row pb-1">
-          <select id="depart" class="form-control control"></select>
+          <select id="orig" class="form-control control"></select>
         </div>
         <div class="form-row pb-1">
-          <select id="arrive" class="form-control control"></select>
+          <select id="dest" class="form-control control"></select>
         </div>
 
         <div class="form-row pb-2">
           <div class="col-6">
             <div class="btn-group btn-group-toggle">
               <label class="btn btn-primary mode">
-                <input type="radio" name="cmd" id="arrive" autocomplete="off" class="control btn-block"> Arr
+                <input type="radio" name="cmd" id="cmd-arrive" autocomplete="off" class="control btn-block"> Arr
               </label>
               <label class="btn btn-outline-primary mode">
-                <input type="radio" name="cmd" id="depart" autocomplete="off" class="control btn-block" checked> Dep
+                <input type="radio" name="cmd" id="cmd-depart" autocomplete="off" class="control btn-block" checked> Dep
               </label>
             </div>
           </div>

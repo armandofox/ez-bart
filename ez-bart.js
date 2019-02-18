@@ -16,11 +16,11 @@ var EZBart = {
 
   ,populateFromFavorites: function() {
     var stn;
-    if (stn = localStorage.getItem('depart')) {
-      $('#depart').prop('selectedIndex', stn);
+    if (stn = localStorage.getItem('orig')) {
+      $('#orig').prop('selectedIndex', stn);
     }
-    if (stn = localStorage.getItem('arrive')) {
-      $('#arrive').prop('selectedIndex', stn);
+    if (stn = localStorage.getItem('dest')) {
+      $('#dest').prop('selectedIndex', stn);
     }
     if (stn = localStorage.getItem('cmd')) {
       $('.mode').removeClass('btn-primary').addClass('btn-outline-primary');
@@ -31,16 +31,16 @@ var EZBart = {
   }
 
   ,swapStations: function() {
-    var tmp = $('#depart').prop('selectedIndex');
-    $('#depart').prop('selectedIndex', $('#arrive').prop('selectedIndex'));
-    $('#arrive').prop('selectedIndex', tmp);
+    var tmp = $('#orig').prop('selectedIndex');
+    $('#orig').prop('selectedIndex', $('#dest').prop('selectedIndex'));
+    $('#dest').prop('selectedIndex', tmp);
     // recalculate route
-    $('#depart').trigger('change');
+    $('#orig').trigger('change');
   }
 
   ,saveFavorite: function() {
-    localStorage.setItem('depart', $('#depart').prop('selectedIndex'));
-    localStorage.setItem('arrive', $('#arrive').prop('selectedIndex'));
+    localStorage.setItem('orig', $('#orig').prop('selectedIndex'));
+    localStorage.setItem('dest', $('#dest').prop('selectedIndex'));
     localStorage.setItem('cmd', $('input:radio[name=cmd]:checked').attr('id'));
     $('#save').html('&#x2714;').delay(2000).html('Make Favorite');
     return(false);
@@ -59,8 +59,8 @@ var EZBart = {
     if (cmd == "arrive") { before=3; after=1; } else { before=0; after=4; }
     var params = {
       "cmd":  cmd,
-      "orig": $('#depart').val(),
-      "dest":  $('#arrive').val(),
+      "orig": $('#orig').val(),
+      "dest":  $('#dest').val(),
       "time": $('#time').val(),
       "b": before,
       "a": after,
@@ -152,7 +152,7 @@ var EZBart = {
   
   ,populate_stations: function() {
     $.each(EZBart.abbrevs, function(val, display_string) {
-      $('#arrive,#depart').append(
+      $('#dest,#orig').append(
         $('<option></option>').attr("value", val).text(display_string));
     });
   }
