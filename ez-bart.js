@@ -73,7 +73,7 @@ var EZBart = {
     };
     
     $.ajax({
-      "url": "http://api.bart.gov/api/sched.aspx",
+      "url": "https://api.bart.gov/api/sched.aspx",
       "success": EZBart.callback,
       "error": EZBart.error,
       "data": params,
