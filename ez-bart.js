@@ -115,7 +115,7 @@ var EZBart = {
   }
 
   ,error: function(xhrObject, errorString, exceptionObject) {
-    $('#results').addClass('alert').addClass('alert-danger').text(errorString);
+    $('#results').addClass('alert').addClass('alert-danger').text("BART site error: " + errorString);
   }
 
   ,populate_time_menu: function() {
