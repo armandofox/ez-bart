@@ -3,6 +3,7 @@
 var EZBart = {
 
   api_key: "MW9S-E7SL-26DU-VV8V"
+  ,relevantDestinations: {}
 
   ,setup: function() {
     EZBart.populate_stations();
@@ -16,7 +17,13 @@ var EZBart = {
 
   ,populateFromFavorites: function() {
     var prefs;
-    if (prefs = localStorage.getItem('ezbart')) {
+    // if localStorage is unavailable due to permissions reasons, skip this
+    try {
+      prefs = localStorage.getItem('ezbart');
+    } catch(err) {
+      return;
+    }
+    if (prefs) {
       try {
         prefs = JSON.parse(prefs);
         $('#orig').prop('selectedIndex', prefs.orig);
@@ -57,6 +64,8 @@ var EZBart = {
   }
 
   ,request: function() {
+    // also trigger a search for advisories
+    EZBart.requestAdvisories();
     var cmd = $('input:radio[name=cmd]:checked').attr('id');
     var after;
     var before;
@@ -84,12 +93,13 @@ var EZBart = {
 
   ,callback: function(data, status, xhrObject) {
     var trips = data["root"]["schedule"]["request"]["trip"];
-    $('#results').html("").removeClass('alert').removeClass('alert-danger');
+    relevantDestinations = {};      // reset global, will populate w/relevant destinations
+    $('#trips').html("").removeClass('alert').removeClass('alert-danger');
     for (var i=0; i < trips.length; i += 1) {
       var trip = trips[i];
       var result = EZBart.trip_to_html(trip);
       var div = $("<div class='border-top'>" + result + "</div>");
-      $('#results').append(div);
+      $('#trips').append(div);
     }
   }
 
@@ -102,6 +112,7 @@ var EZBart = {
         origTime + "&nbsp;&rarr;&nbsp;" + destTime +
         "</div>" +
         "<div class='text-secondary'>" + leg[0]["@trainHeadStation"] + " train";
+    relevantDestinations[leg[0]["@trainHeadStation"]] = true;
     if (numLegs > 1) {
       result += ", change at " + EZBart.abbrevs[leg[1]["@origin"].toLowerCase()] +
         " for " + leg[1]["@trainHeadStation"] + " train";
@@ -114,8 +125,50 @@ var EZBart = {
     return(result);
   }
 
+  ,requestRealTimeDep: function() {
+    
+  }
+
+  ,parseRealTimeDep: function(data,status,xhrObj) {
+    // create array sorted by minutes til departure where each elt looks like:
+    //  {"destination": "Antioch", "minutes": 10}
+    // and only destinations matching the latest trip results are included
+    var sortedDeps = [];
+    data['root']['station'][0]['etd'].forEach(function(destination) {
+      if (relevantDestinations[destination]) {
+        
+      };
+    });
+  }
+  
+  ,requestAdvisories: function() {
+    // clear previous advisories
+    $('#advisories').html('').removeClass('alert').removeClass('alert-danger');
+    $.ajax({
+      "url": "https://api.bart.gov/api/bsa.aspx",
+      "success": EZBart.parseAdvisories,
+      "dataType": "json",
+      "timeout": 4000,
+      "data": {
+        "cmd":  "bsa",
+        "json": "y",
+        "key": EZBart.api_key
+      }
+    });
+  }
+  ,parseAdvisories: function(data,status,xhrObj) {
+    var msg;
+    try {
+      msg = data['root']['bsa'][0]['description']['#cdata-section'];
+      if (msg != 'No delays reported.') {
+        $('#advisories').addClass('alert').addClass('alert-danger').text(msg);
+      }
+    } catch(err) {
+    }
+  }
+
   ,error: function(xhrObject, errorString, exceptionObject) {
-    $('#results').addClass('alert').addClass('alert-danger').text("BART site error: " + errorString);
+    $('#trips').addClass('alert').addClass('alert-danger').text("BART site error: " + errorString);
   }
 
   ,populate_time_menu: function() {
