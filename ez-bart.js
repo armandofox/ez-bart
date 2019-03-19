@@ -12,7 +12,18 @@ var EZBart = {
     $('.control').change(EZBart.request);
     $('#swap').click(EZBart.swapStations);
     $('#save').click(EZBart.saveFavorite);
+    $('#realtime').click(EZBart.requestRealTimeDep);
     EZBart.populateFromFavorites();
+    EZBart.request();
+  }
+
+  ,clearOtherInfo: function() {
+    // clear previous advisories
+    $('#advisories').html('').removeClass('alert').removeClass('alert-danger');
+    // clear realtime departures
+    $('#departures').html('').removeClass('alert').removeClass('alert-warning');
+    // clear relevant dests
+    EZBart.relevantDestinations = {};
   }
 
   ,populateFromFavorites: function() {
@@ -66,6 +77,8 @@ var EZBart = {
   ,request: function() {
     // also trigger a search for advisories
     EZBart.requestAdvisories();
+    // clear other data
+    EZBart.clearOtherInfo();
     var cmd = $('input:radio[name=cmd]:checked').attr('id');
     var after;
     var before;
@@ -93,7 +106,6 @@ var EZBart = {
 
   ,callback: function(data, status, xhrObject) {
     var trips = data["root"]["schedule"]["request"]["trip"];
-    relevantDestinations = {};      // reset global, will populate w/relevant destinations
     $('#trips').html("").removeClass('alert').removeClass('alert-danger');
     for (var i=0; i < trips.length; i += 1) {
       var trip = trips[i];
@@ -112,7 +124,8 @@ var EZBart = {
         origTime + "&nbsp;&rarr;&nbsp;" + destTime +
         "</div>" +
         "<div class='text-secondary'>" + leg[0]["@trainHeadStation"] + " train";
-    relevantDestinations[leg[0]["@trainHeadStation"]] = true;
+    // add the first leg of each trip to relevant destinations for RealTimeDepartures
+    EZBart.addRelevantDestination(leg[0]);
     if (numLegs > 1) {
       result += ", change at " + EZBart.abbrevs[leg[1]["@origin"].toLowerCase()] +
         " for " + leg[1]["@trainHeadStation"] + " train";
@@ -124,26 +137,41 @@ var EZBart = {
     result += "</div>";
     return(result);
   }
-
-  ,requestRealTimeDep: function() {
-    
+  ,addRelevantDestination: function(leg) {
+    var routeAlias = EZBart.routeAliases[leg["@trainHeadStation"]];
+    EZBart.relevantDestinations[routeAlias] = true;
   }
-
+  ,requestRealTimeDep: function() {
+    $.ajax({
+      "url": "https://api.bart.gov/api/etd.aspx",
+      "success": EZBart.parseRealTimeDep,
+      "dataType": "json",
+      "timeout": 4000,
+      "data": {
+        "cmd":  "etd",
+        "orig": $('#orig').val(),
+        "json": "y",
+        "key": EZBart.api_key
+      }
+    });
+  }
   ,parseRealTimeDep: function(data,status,xhrObj) {
     // create array sorted by minutes til departure where each elt looks like:
-    //  {"destination": "Antioch", "minutes": 10}
+    //  {"destination": "Antioch", "minutes": [10,16]}
     // and only destinations matching the latest trip results are included
-    var sortedDeps = [];
-    data['root']['station'][0]['etd'].forEach(function(destination) {
-      if (relevantDestinations[destination]) {
-        
+    var deps = [];
+    var byNextDeparture = function(a,b) { return (parseInt(a['estimate'][0]['minutes']) - parseInt(b['estimate'][0]['minutes'])); };
+    data['root']['station'][0]['etd'].sort(byNextDeparture).forEach(function(destination) {
+      if (EZBart.relevantDestinations[destination['destination']]) {
+        deps.push(destination['destination'] + ': ' + 
+                  destination['estimate'].map(function(elt) { return elt.minutes }).join(', ') +
+                  ' min');
       };
     });
+    $('#departures').addClass('alert').addClass('alert-warning').html(deps.join('<br>'));
   }
   
   ,requestAdvisories: function() {
-    // clear previous advisories
-    $('#advisories').html('').removeClass('alert').removeClass('alert-danger');
     $.ajax({
       "url": "https://api.bart.gov/api/bsa.aspx",
       "success": EZBart.parseAdvisories,
@@ -162,6 +190,8 @@ var EZBart = {
       msg = data['root']['bsa'][0]['description']['#cdata-section'];
       if (msg != 'No delays reported.') {
         $('#advisories').addClass('alert').addClass('alert-danger').text(msg);
+        // if there are advisories, also show realtime departure info
+        EZBart.requestRealTimeDep();
       }
     } catch(err) {
     }
@@ -267,34 +297,18 @@ var EZBart = {
     "woak": "West Oakland"
   }
 
-  ,routes: [
-    // https://api.bart.gov/docs/route/routes.aspx
-    // can get this automatically by requesting ?cmd=routes&json=y&key=KEY
-    //  and dereferencing result.root.routes.route[], each of which has keys
-    //  "name", "abbr", "routeID" (eg "ROUTE 1"), "number", "hexcolor"
-    "",                         // dummy route 0
-    "SFO/Millbrae", // 1
-    "Pittsburg/Bay Point", // 2
-    "Richmond", // 3
-    "Warm Springs/South Fremont", // 4
-    "Daly City", // 5
-    "Warm Springs/South Fremont", // 6
-    "Millbrae", // 7
-    "Richmond", // 8
-    "", // dummy 9
-    "", // dummy 10
-    "Daly City", // 11
-    "Dublin/Pleasanton", // 12
-    "", // dummy 13
-    "", // dummy 14
-    "", // dummy 15
-    "", // dummy 16
-    "", // dummy 17
-    "", // dummy 18
-    "Oakland Airport Connector", // 19
-    "Coliseum" // 20
-  ]
-  
+  ,routeAliases: {
+    "San Francisco International Airport" : "SF Airport",
+    "Warm Springs/South Fremont" :  "Warm Springs",
+    // the following routes are named the same as their end stations
+    "Daly City" : "Daly City",
+    "Millbrae" : "Millbrae",
+    "Antioch" : "Antioch",
+    "Dublin/Pleasanton" : "Dublin/Pleasanton",
+    "Fremont" : "Fremont",
+    "Richmond" : "Richmond"
+  }
+
 }
 
 $(EZBart.setup);
