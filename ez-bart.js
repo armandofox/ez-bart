@@ -160,12 +160,21 @@ var EZBart = {
     //  {"destination": "Antioch", "minutes": [10,16]}
     // and only destinations matching the latest trip results are included
     var deps = [];
+    var nowPlusMinutes = function(min) { 
+      if (min == "Leaving") {
+        return(min);
+      } else {
+        // why is there no goddamn sprintf or strftime
+        var newDate = new Date(Date.now() + 1000*60*parseInt(min));
+        return(newDate.getHours().toString() + ":" + 
+               ("0" + newDate.getMinutes().toString()).slice(-2));
+      }
+    }
     var byNextDeparture = function(a,b) { return (parseInt(a['estimate'][0]['minutes']) - parseInt(b['estimate'][0]['minutes'])); };
     data['root']['station'][0]['etd'].sort(byNextDeparture).forEach(function(destination) {
       if (EZBart.relevantDestinations[destination['destination']]) {
         deps.push(destination['destination'] + ': ' + 
-                  destination['estimate'].map(function(elt) { return elt.minutes }).join(', ') +
-                  ' min');
+                  destination['estimate'].map(function(elt) { return nowPlusMinutes(elt.minutes); }).join(', '));
       };
     });
     $('#departures').addClass('alert').addClass('alert-warning').html(deps.join('<br>'));
@@ -202,7 +211,7 @@ var EZBart = {
   }
 
   ,populate_time_menu: function() {
-    var now = new Date();
+    var now = new Date(Date.now());
     var index = 4 * Math.floor(now.getHours() - 4) +
         (Math.floor(now.getMinutes() / 15));
     if (index < 0) { index = 0 };
