@@ -177,7 +177,9 @@ var EZBart = {
                   destination['estimate'].map(function(elt) { return nowPlusMinutes(elt.minutes); }).join(', '));
       };
     });
-    $('#departures').addClass('alert').addClass('alert-warning').html(deps.join('<br>'));
+    if (deps.length > 0) {
+      $('#departures').addClass('alert').addClass('alert-warning').html(deps.join('<br>'));
+    }
   }
   
   ,requestAdvisories: function() {
