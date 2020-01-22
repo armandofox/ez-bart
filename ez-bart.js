@@ -215,13 +215,18 @@ var EZBart = {
   ,populate_time_menu: function() {
     var now = new Date(Date.now());
     var index = 4 * Math.floor(now.getHours() - 4) +
-        (Math.floor(now.getMinutes() / 15));
+        (Math.floor(now.getMinutes() / 15)) + 1;
+    var maxindex = EZBart.times.length - 1;
     if (index < 0) { index = 0 };
-    for (var i=index; i < EZBart.times.length; i += 1) {
+    if (index > maxindex) { index = maxindex; }
+    for (var i=0; i <= maxindex; i += 1) {
       var time = EZBart.times[i];
-      $('#time').append(
-        $('<option></option>').attr("value", time).text(time)
-      );
+      var opt = $('<option></option>').attr("value", time).text(time);
+      // let the current time be selected
+      if (i == index) {
+        opt.attr("selected", "selected");
+      }
+      $('#time').append(opt);
     }
   }
   ,times: [
