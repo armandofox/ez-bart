@@ -271,6 +271,7 @@ var EZBart = {
     "antc": "Antioch",
     "balb": "Balboa Park (SF)",
     "bayf": "Bay Fair (San Leandro)",
+    "bery": "Berryessa",
     "cast": "Castro Valley",
     "civc": "Civic Center (SF)",
     "cols": "Coliseum",
@@ -290,6 +291,7 @@ var EZBart = {
     "lake": "Lake Merritt (Oakland)",
     "mcar": "MacArthur (Oakland)",
     "mlbr": "Millbrae",
+    "mlpt": "Milpitas",
     "mont": "Montgomery St. (SF)",
     "nbrk": "North Berkeley",
     "ncon": "North Concord/Martinez",
@@ -315,7 +317,7 @@ var EZBart = {
 
   ,routeAliases: {
     "San Francisco International Airport" : "SF Airport",
-    "Warm Springs/South Fremont" :  "Warm Springs",
+    "Berryessa" : "Berryessa/North San Jose",
     // the following routes are named the same as their end stations
     "Daly City" : "Daly City",
     "Millbrae" : "Millbrae",
