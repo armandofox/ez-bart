@@ -75,8 +75,6 @@ var EZBart = {
   }
 
   ,request: function() {
-    // also trigger a search for advisories
-    EZBart.requestAdvisories();
     // clear other data
     EZBart.clearOtherInfo();
     var cmd = $('input:radio[name=cmd]:checked').attr('id');
@@ -113,6 +111,8 @@ var EZBart = {
       var div = $("<div class='border-top'>" + result + "</div>");
       $('#trips').append(div);
     }
+    // also trigger a search for advisories
+    EZBart.requestAdvisories();
   }
 
   ,trip_to_html: function(trip) {
@@ -121,7 +121,7 @@ var EZBart = {
     var origTime = leg[0]["@origTimeMin"];
     var destTime = leg[numLegs-1]["@destTimeMin"];
     var result = "<div class='text-primary font-weight-bold'>" +
-        origTime + "&nbsp;&rarr;&nbsp;" + destTime +
+        EZBart.formatTime(origTime) + "&nbsp;&rarr;&nbsp;" + EZBart.formatTime(destTime) +
         "</div>" +
         "<div class='text-secondary'>" + leg[0]["@trainHeadStation"] + " train";
     // add the first leg of each trip to relevant destinations for RealTimeDepartures
@@ -156,10 +156,6 @@ var EZBart = {
     });
   }
   ,parseRealTimeDep: function(data,status,xhrObj) {
-    // create array sorted by minutes til departure where each elt looks like:
-    //  {"destination": "Antioch", "minutes": [10,16]}
-    // and only destinations matching the latest trip results are included
-    var deps = [];
     var nowPlusMinutes = function(min) { 
       if (min == "Leaving") {
         return(min);
@@ -170,18 +166,18 @@ var EZBart = {
                ("0" + newDate.getMinutes().toString()).slice(-2));
       }
     }
-    var byNextDeparture = function(a,b) { return (parseInt(a['estimate'][0]['minutes']) - parseInt(b['estimate'][0]['minutes'])); };
-    data['root']['station'][0]['etd'].sort(byNextDeparture).forEach(function(destination) {
-      if (EZBart.relevantDestinations[destination['destination']]) {
-        deps.push(destination['destination'] + ': ' + 
-                  destination['estimate'].map(function(elt) { return nowPlusMinutes(elt.minutes); }).join(', '));
-      };
-    });
+    var deps = [];
+    for (const route of data['root']['station'][0]['etd']) {
+      if (EZBart.relevantDestinations[route['destination']]) {
+        deps.push(route['destination'] + ': ' +
+                  route['estimate'].map(est => nowPlusMinutes(est.minutes)).join(', '));
+      }
+    }
     if (deps.length > 0) {
       $('#departures').addClass('alert').addClass('alert-warning').html(deps.join('<br>'));
     }
   }
-  
+
   ,requestAdvisories: function() {
     $.ajax({
       "url": "https://api.bart.gov/api/bsa.aspx",
@@ -228,6 +224,15 @@ var EZBart = {
       }
       $('#time').append(opt);
     }
+  }
+  ,formatTime: function(time) {
+    // 05:35 PM => 17:35
+    if (EZBart.amPm) { return(time); }
+    var hour = parseInt(time.slice(0,2));
+    if (time.slice(-2) == 'PM') {
+      hour += 12;
+    }
+    return(hour.toString() + ':' + time.slice(3,5));
   }
   ,times: [
     '4:00 am', '4:15 am', '4:30 am', '4:45 am', 
@@ -317,13 +322,14 @@ var EZBart = {
 
   ,routeAliases: {
     "San Francisco International Airport" : "SF Airport",
-    "Berryessa" : "Berryessa/North San Jose",
+    "OAK Airport / Berryessa/North San Jose" : "Berryessa",
     // the following routes are named the same as their end stations
     "Daly City" : "Daly City",
     "Millbrae" : "Millbrae",
+    "SF / Millbrae / SFO Airport" : "Millbrae/SFO",
     "Antioch" : "Antioch",
-    "Dublin/Pleasanton" : "Dublin/Pleasanton",
-    "Fremont" : "Fremont",
+    "SF / OAK Airport / Dublin/Pleasanton" : "Dublin/Pleasanton",
+    "SF / OAK Airport / Berryessa" : "Berryessa",
     "Richmond" : "Richmond"
   }
 
