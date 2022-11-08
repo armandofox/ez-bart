@@ -229,7 +229,7 @@ var EZBart = {
     // 05:35 PM => 17:35
     if (EZBart.amPm) { return(time); }
     var hour = parseInt(time.slice(0,2));
-    if (time.slice(-2) == 'PM') {
+    if (time.slice(-2) == 'PM'  &&  hour < 12) {
       hour += 12;
     }
     return(hour.toString() + ':' + time.slice(3,5));
