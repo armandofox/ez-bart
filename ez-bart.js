@@ -169,6 +169,7 @@ var EZBart = {
     var deps = [];
     for (const route of data['root']['station'][0]['etd']) {
       if (EZBart.relevantDestinations[route['destination']]) {
+        //  tbd: check if route.estimate[n].cancelflag is not "0" to show cxld trip
         deps.push(route['destination'] + ': ' +
                   route['estimate'].map(est => nowPlusMinutes(est.minutes)).join(', '));
       }
