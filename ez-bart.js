@@ -74,9 +74,17 @@ var EZBart = {
     $(this).addClass('btn-primary');
   }
 
+  ,setRealTimeDepartureLinks: function() {
+    const realtimeDepsUrlBase = "https://bart.gov/schedules/eta?stn=";
+    $('#origExt').attr('href', realtimeDepsUrlBase + $('#orig').val());
+    $('#destExt').attr('href', realtimeDepsUrlBase + $('#dest').val());
+  }
+  
   ,request: function() {
     // clear other data
     EZBart.clearOtherInfo();
+    // set links to external BART site
+    EZBart.setRealTimeDepartureLinks();
     var cmd = $('input:radio[name=cmd]:checked').attr('id');
     var after;
     var before;
