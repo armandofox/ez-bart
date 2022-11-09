@@ -166,19 +166,25 @@ var EZBart = {
                ("0" + newDate.getMinutes().toString()).slice(-2));
       }
     }
+    var formatDepartureTime = function(est) {
+      if (est.cancelflag == "0") {
+        return(nowPlusMinutes(est.minutes));
+      } else {
+        return('<s class="text-danger">' + nowPlusMinutes(est.minutes) + '</s>');
+      }
+    }
     var deps = [];
     for (const route of data['root']['station'][0]['etd']) {
       if (EZBart.relevantDestinations[route['destination']]) {
         //  tbd: check if route.estimate[n].cancelflag is not "0" to show cxld trip
         deps.push(route['destination'] + ': ' +
-                  route['estimate'].map(est => nowPlusMinutes(est.minutes)).join(', '));
+                  route['estimate'].map(formatDepartureTime).join(', '));
       }
     }
     if (deps.length > 0) {
       $('#departures').addClass('alert').addClass('alert-warning').html(deps.join('<br>'));
     }
   }
-
   ,requestAdvisories: function() {
     $.ajax({
       "url": "https://api.bart.gov/api/bsa.aspx",
