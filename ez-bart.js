@@ -2,7 +2,8 @@
 
 var EZBart = {
 
-  api_key: "MW9S-E7SL-26DU-VV8V"
+  //api_key: "MW9S-E7SL-26DU-VV8V"
+  api_key: "Z6MM-5V6D-9QYT-DWE9"
   ,relevantDestinations: {}
 
   ,setup: function() {
@@ -106,7 +107,7 @@ var EZBart = {
       "error": EZBart.error,
       "data": params,
       "dataType": "json",
-      "timeout": 4000
+      "timeout": 5000
     });
   }
 
@@ -115,9 +116,12 @@ var EZBart = {
     $('#trips').html("").removeClass('alert').removeClass('alert-danger');
     for (var i=0; i < trips.length; i += 1) {
       var trip = trips[i];
-      var result = EZBart.trip_to_html(trip);
-      var div = $("<div class='border-top'>" + result + "</div>");
-      $('#trips').append(div);
+      // for some reason, some trips do not have the 'leg' property....
+      if ('leg' in trip) {
+        var result = EZBart.trip_to_html(trip);
+        var div = $("<div class='border-top'>" + result + "</div>");
+        $('#trips').append(div);
+      }
     }
     // also trigger a search for advisories
     EZBart.requestAdvisories();
@@ -131,19 +135,22 @@ var EZBart = {
     var result = "<div class='text-primary font-weight-bold'>" +
         EZBart.formatTime(origTime) + "&nbsp;&rarr;&nbsp;" + EZBart.formatTime(destTime) +
         "</div>" +
-        "<div class='text-secondary'>" + leg[0]["@trainHeadStation"] + " train";
+        "<div class='text-secondary'>" + EZBart.lineName(leg[0]);
     // add the first leg of each trip to relevant destinations for RealTimeDepartures
     EZBart.addRelevantDestination(leg[0]);
     if (numLegs > 1) {
       result += ", change at " + EZBart.abbrevs[leg[1]["@origin"].toLowerCase()] +
-        " for " + leg[1]["@trainHeadStation"] + " train";
+        " for " + EZBart.lineName(leg[1]);
       if (numLegs > 2) {
         result += ", then at " + EZBart.abbrevs[leg[2]["@origin"].toLowerCase()] +
-          " for " + leg[2]["@trainHeadStation"] + " train";
+          " for " + EZBart.lineName(leg[2]);
       }
     }
     result += "</div>";
     return(result);
+  }
+  ,lineName: function(leg) {
+    return(EZBart.routeIds[leg["@line"]]["name"] + " train");
   }
   ,addRelevantDestination: function(leg) {
     var routeAlias = EZBart.routeAliases[leg["@trainHeadStation"]];
@@ -154,7 +161,7 @@ var EZBart = {
       "url": "https://api.bart.gov/api/etd.aspx",
       "success": EZBart.parseRealTimeDep,
       "dataType": "json",
-      "timeout": 4000,
+      "timeout": 3000,
       "data": {
         "cmd":  "etd",
         "orig": $('#orig').val(),
@@ -198,7 +205,7 @@ var EZBart = {
       "url": "https://api.bart.gov/api/bsa.aspx",
       "success": EZBart.parseAdvisories,
       "dataType": "json",
-      "timeout": 4000,
+      "timeout": 3000,
       "data": {
         "cmd":  "bsa",
         "json": "y",
@@ -335,6 +342,21 @@ var EZBart = {
     "woak": "West Oakland"
   }
 
+  ,routeIds: {
+    "ROUTE 19": {"name": "Coliseum", "hexcolor" : "#D5CFA3"},
+    "ROUTE 20": {"name": "Oakland Airport", "hexcolor" : "#D5CFA3"},
+    "ROUTE 11": {"name": "Daly City", "hexcolor" : "#0099CC"},
+    "ROUTE 12": {"name": "Dublin/Pleasanton", "hexcolor" : "#0099CC"},
+    "ROUTE 5":  {"name" : "Berryessa", "hexcolor" : "#339933"},
+    "ROUTE 6":  {"name": "Daly City",  "hexcolor" : "#339933"},
+    "ROUTE 3":  {"name": "Richmond", "hexcolor" : "#FF9933"},
+    "ROUTE 4":  {"name": "Berryessa", "hexcolor" : "#FF9933"},
+    "ROUTE 8":  {"name": "Richmond", "hexcolor" : "#FF0000"},
+    "ROUTE 7":  {"name": "Millbrae", "hexcolor" : "#FF0000"},
+    "ROUTE 1":  {"name": "San Francisco Int'l Airport", "hexcolor" : "#FFFF33"},
+    "ROUTE 2":  {"name": "Antioch", "hexcolor" : "#FFFF33"}
+  }
+  
   ,routeAliases: {
     "San Francisco International Airport" : "SF Airport",
     "OAK Airport / Berryessa/North San Jose" : "Berryessa",
